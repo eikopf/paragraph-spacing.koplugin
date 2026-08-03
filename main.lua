@@ -6,6 +6,7 @@ local T = require("ffi/util").template
 local LEGACY_SETTING_NAME = "paragraph_spacing"
 local SETTING_NAME = "copt_paragraph_spacing"
 local CONFIGURABLE_NAME = "paragraph_spacing"
+local BOOK_TWEAK_ENABLED_SETTING = "paragraph_spacing_book_tweak_was_enabled"
 local PUBLISHER_DEFAULT = 0
 local NO_SPACING = 1
 local MAX_SPACING_LEVEL = 101
@@ -202,13 +203,27 @@ end
 function ParagraphSpacing:setSpacing(value, apply)
   value = normalizeValue(value)
   local style_tweak = self.ui.styletweak
+  local had_managed_block = style_tweak.book_style_tweak
+      and style_tweak.book_style_tweak:find(BLOCK_PATTERN) ~= nil
   local css = removeManagedBlock(style_tweak.book_style_tweak)
 
   if value ~= PUBLISHER_DEFAULT then
+    if not had_managed_block then
+      self.ui.doc_settings:saveSetting(
+        BOOK_TWEAK_ENABLED_SETTING,
+        style_tweak.book_style_tweak_enabled == true
+      )
+    end
     css = appendManagedBlock(css, makeManagedBlock(value))
     style_tweak.book_style_tweak_enabled = true
-  elseif not css then
-    style_tweak.book_style_tweak_enabled = false
+  else
+    local was_enabled = self.ui.doc_settings:readSetting(BOOK_TWEAK_ENABLED_SETTING)
+    if not css then
+      style_tweak.book_style_tweak_enabled = false
+    elseif was_enabled ~= nil then
+      style_tweak.book_style_tweak_enabled = was_enabled
+    end
+    self.ui.doc_settings:delSetting(BOOK_TWEAK_ENABLED_SETTING)
   end
 
   self.value = value
