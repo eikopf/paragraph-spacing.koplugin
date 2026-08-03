@@ -6,10 +6,10 @@ spacing control.
 
 ## Installation
 
-Download `paragraph-spacing.koplugin.zip` from the latest GitHub release and
-extract it into KOReader's `plugins` directory. The resulting directory must be
-named `paragraph-spacing.koplugin`. Restart KOReader, open a reflowable book,
-and use the paragraph spacing row in the bottom configuration menu.
+Download `paragraph-spacing.koplugin-vX.Y.Z.zip` from the latest GitHub release
+and extract it into KOReader's `plugins` directory. The resulting directory
+must be named `paragraph-spacing.koplugin`. Restart KOReader, open a reflowable
+book, and use the paragraph spacing row in the bottom configuration menu.
 
 ## Compatibility
 

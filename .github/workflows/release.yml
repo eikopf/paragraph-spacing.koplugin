@@ -8,6 +8,9 @@ on:
 permissions:
   contents: write
 
+env:
+  RELEASE_ARCHIVE: paragraph-spacing.koplugin-${{ github.ref_name }}.zip
+
 jobs:
   release:
     runs-on: ubuntu-latest
@@ -45,14 +48,13 @@ jobs:
           git archive \
             --format=zip \
             --prefix=paragraph-spacing.koplugin/ \
-            --output=paragraph-spacing.koplugin.zip \
+            --output="${RELEASE_ARCHIVE}" \
             "${GITHUB_SHA}" \
             _meta.lua \
             main.lua \
             README.md \
             COMPATIBILITY.md \
             LICENSE
-          sha256sum paragraph-spacing.koplugin.zip > paragraph-spacing.koplugin.zip.sha256
 
       - name: Create GitHub release
         env:
@@ -70,6 +72,5 @@ jobs:
           gh release edit "${GITHUB_REF_NAME}" \
             --title "${GITHUB_REF_NAME}"
           gh release upload "${GITHUB_REF_NAME}" \
-            paragraph-spacing.koplugin.zip#"KOReader plugin" \
-            paragraph-spacing.koplugin.zip.sha256#"SHA-256 checksum" \
+            "${RELEASE_ARCHIVE}#KOReader plugin" \
             --clobber
