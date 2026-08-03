@@ -193,9 +193,13 @@ function ParagraphSpacing:onReadSettings(config)
   if value ~= self.value then
     config:saveSetting(SETTING_NAME, self.value)
   end
+  -- ReaderStyleTweak has already read the persisted book CSS at this point.
+  -- Reconcile it with the selected/default value before the first render, but
+  -- do not dispatch ApplyStyleSheet while the document is still loading.
+  self:setSpacing(self.value, false)
 end
 
-function ParagraphSpacing:setSpacing(value)
+function ParagraphSpacing:setSpacing(value, apply)
   value = normalizeValue(value)
   local style_tweak = self.ui.styletweak
   local css = removeManagedBlock(style_tweak.book_style_tweak)
@@ -219,7 +223,10 @@ function ParagraphSpacing:setSpacing(value)
   -- updateCssText() is an internal ReaderStyleTweak API, not a stable plugin
   -- interface. Passing true rebuilds its aggregate CSS and immediately sends
   -- ApplyStyleSheet to ReaderTypeset, avoiding a document reopen.
-  style_tweak:updateCssText(true)
+  if apply == nil then
+    apply = true
+  end
+  style_tweak:updateCssText(apply)
 end
 
 function ParagraphSpacing:onSetParagraphSpacing(value)
