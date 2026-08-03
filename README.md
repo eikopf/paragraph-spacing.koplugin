@@ -25,7 +25,8 @@ technical details and compatibility history.
 
 ## Versioning
 
-Releases follow [Semantic Versioning](https://semver.org/). The version in
-`_meta.lua` is mirrored by a `vX.Y.Z` Git tag. KOReader does not currently use
-the metadata version itself; the Git tag and corresponding release are the
-canonical distribution version.
+Stable releases use the `MAJOR.MINOR.PATCH` form from
+[Semantic Versioning](https://semver.org/) and do not currently publish
+prerelease tags. The version in `_meta.lua` is mirrored by a `vX.Y.Z` Git tag.
+KOReader does not use the metadata version itself; the Git tag and corresponding
+release are the canonical distribution version.
