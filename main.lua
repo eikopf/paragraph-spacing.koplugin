@@ -179,6 +179,19 @@ local function injectBottomMenuOption(config_options)
   return true
 end
 
+local function removeBottomMenuOption(config_options)
+  if type(config_options) ~= "table" then return end
+  for _, panel in ipairs(config_options) do
+    if type(panel.options) == "table" then
+      for index = #panel.options, 1, -1 do
+        if panel.options[index].name == CONFIGURABLE_NAME then
+          table.remove(panel.options, index)
+        end
+      end
+    end
+  end
+end
+
 function ParagraphSpacing:init()
   -- ReaderStyleTweak and CSS reflow are available only on ReaderUI's rolling
   -- document path. Not registering here keeps this out of PDF/fixed-layout UI.
@@ -287,6 +300,13 @@ function ParagraphSpacing:onSetParagraphSpacing(value)
   end
   self:setSpacing(value)
   return true
+end
+
+function ParagraphSpacing:onCloseWidget()
+  if self.bottom_menu_injected and self.ui.config then
+    removeBottomMenuOption(self.ui.config.options)
+    self.bottom_menu_injected = false
+  end
 end
 
 -- Used only when the internal bottom-menu option injection is unavailable.
