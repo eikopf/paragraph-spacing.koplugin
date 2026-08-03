@@ -13,7 +13,6 @@ local NO_SPACING = 1
 local MAX_SPACING_LEVEL = 101
 local BLOCK_START = "/* paragraph-spacing.koplugin:start */"
 local BLOCK_END = "/* paragraph-spacing.koplugin:end */"
-local BLOCK_PATTERN = "\n?/%* paragraph%-spacing%.koplugin:start %*/.-/%* paragraph%-spacing%.koplugin:end %*/"
 
 local OPTION_VALUES = { PUBLISHER_DEFAULT, NO_SPACING }
 local BOTTOM_MENU_LABELS = {
@@ -83,12 +82,44 @@ local function normalizeValue(value)
   return PUBLISHER_DEFAULT
 end
 
-local function removeManagedBlock(css)
-  if not css then
-    return nil
-  end
+local function findManagedBlock(css)
+  if not css then return end
 
-  css = css:gsub(BLOCK_PATTERN, "")
+  local search_pos = 1
+  local pending_start
+  local matched_start
+  local matched_end
+  while true do
+    local start_pos = css:find(BLOCK_START, search_pos, true)
+    local end_pos = css:find(BLOCK_END, search_pos, true)
+    if not start_pos and not end_pos then
+      break
+    elseif start_pos and (not end_pos or start_pos < end_pos) then
+      -- The most recent start marker owns the next end marker. This prevents
+      -- an older orphan start marker from swallowing unrelated CSS.
+      pending_start = start_pos
+      search_pos = start_pos + #BLOCK_START
+    else
+      if pending_start then
+        matched_start = pending_start
+        matched_end = end_pos + #BLOCK_END - 1
+        pending_start = nil
+      end
+      search_pos = end_pos + #BLOCK_END
+    end
+  end
+  return matched_start, matched_end
+end
+
+local function removeManagedBlock(css)
+  local start_pos, end_pos = findManagedBlock(css)
+  while start_pos do
+    if start_pos > 1 and css:sub(start_pos - 1, start_pos - 1) == "\n" then
+      start_pos = start_pos - 1
+    end
+    css = css:sub(1, start_pos - 1) .. css:sub(end_pos + 1)
+    start_pos, end_pos = findManagedBlock(css)
+  end
   if css == "" then
     return nil
   end
@@ -204,8 +235,7 @@ end
 function ParagraphSpacing:setSpacing(value, apply)
   value = normalizeValue(value)
   local style_tweak = self.ui.styletweak
-  local had_managed_block = style_tweak.book_style_tweak
-      and style_tweak.book_style_tweak:find(BLOCK_PATTERN) ~= nil
+  local had_managed_block = findManagedBlock(style_tweak.book_style_tweak) ~= nil
   local css = removeManagedBlock(style_tweak.book_style_tweak)
 
   if value ~= PUBLISHER_DEFAULT then
