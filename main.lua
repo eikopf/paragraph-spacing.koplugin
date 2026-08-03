@@ -1,5 +1,6 @@
 local WidgetContainer = require("ui/widget/container/widgetcontainer")
 local logger = require("logger")
+local Notification = require("ui/widget/notification")
 local _ = require("gettext")
 local T = require("ffi/util").template
 
@@ -245,6 +246,15 @@ function ParagraphSpacing:setSpacing(value, apply)
 end
 
 function ParagraphSpacing:onSetParagraphSpacing(value)
+  value = normalizeValue(value)
+  if value ~= PUBLISHER_DEFAULT and not self.ui.styletweak.enabled then
+    -- ConfigDialog has already emitted ConfigChange, so restore the displayed
+    -- selection when we cannot honor the request without enabling unrelated
+    -- style tweaks.
+    self.ui.document.configurable[CONFIGURABLE_NAME] = self.value
+    Notification:notify(_("Enable Style tweaks before setting paragraph spacing."))
+    return true
+  end
   self:setSpacing(value)
   return true
 end
@@ -260,7 +270,7 @@ function ParagraphSpacing:addToMainMenu(menu_items)
         return self.value == value
       end,
       callback = function(touchmenu_instance)
-        self:setSpacing(value)
+        self:onSetParagraphSpacing(value)
         if touchmenu_instance then
           touchmenu_instance:updateItems()
         end

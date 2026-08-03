@@ -47,6 +47,8 @@ rerendered immediately.
 
 If KOReader changes `ReaderStyleTweak`, check that `book_style_tweak`,
 `book_style_tweak_enabled`, and `updateCssText(true)` still have these semantics.
+When KOReader's master Style tweaks switch is disabled, the plugin rejects new
+spacing selections with a notification instead of enabling unrelated tweaks.
 
 ## Settings migration
 
