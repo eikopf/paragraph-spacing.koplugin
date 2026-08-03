@@ -45,7 +45,7 @@ end
 -- cached by require(), so this table may outlive an individual ReaderUI.
 local BOTTOM_MENU_OPTION = {
   name = CONFIGURABLE_NAME,
-  name_text = _("Paragraph spacing"),
+  name_text = _("Paragraph Spacing"),
   buttonprogress = true,
   values = OPTION_VALUES,
   labels = OPTION_LABELS,
@@ -130,7 +130,7 @@ local function injectBottomMenuOption(config_options)
     if type(panel.options) == "table" then
       for index, option in ipairs(panel.options) do
         if option.name == CONFIGURABLE_NAME then
-          return true           -- Already injected by an earlier ReaderUI.
+          return true -- Already injected by an earlier ReaderUI.
         elseif option.name == "line_spacing" then
           line_spacing_options = panel.options
           line_spacing_index = index
