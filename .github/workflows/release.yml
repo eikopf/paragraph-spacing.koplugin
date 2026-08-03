@@ -62,9 +62,13 @@ jobs:
           set -euo pipefail
 
           version="${GITHUB_REF_NAME#v}"
-          gh release create "${GITHUB_REF_NAME}" \
+          if ! gh release view "${GITHUB_REF_NAME}" >/dev/null 2>&1; then
+            gh release create "${GITHUB_REF_NAME}" \
+              --verify-tag \
+              --generate-notes \
+              --title "Paragraph spacing ${version}"
+          fi
+          gh release upload "${GITHUB_REF_NAME}" \
             paragraph-spacing.koplugin.zip#"KOReader plugin" \
             paragraph-spacing.koplugin.zip.sha256#"SHA-256 checksum" \
-            --verify-tag \
-            --generate-notes \
-            --title "Paragraph spacing ${version}"
+            --clobber
